@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CS 173 COS_1</title>
+</head>
+<body>
+  <div class="login-container">
+    <h2>Login</h2>
+    <div class="input-row">
+      <p>Email Address:</p>
+      <input type="email" id="email-field" placeholder="email@adress.com" required>
+      <button id="login-btn">Send!</button>
+    </div>
+    <div id="notification" class="hidden">
+      Email verification sent! Check your inbox to complete logging in.
+    </div>
+    <a href="homepage.html" id="after-login" class="hidden">Next</a>
+  </div>
+</body>
+</html>
+
+<script>
+  const loginBtn = document.getElementById('login-btn');
+  const emailInput = document.getElementById('email-field');
+  const notification = document.getElementById('notification');
+  const afterLogin = document.getElementById('after-login');
+  loginBtn.addEventListener('click', () => {
+    if (emailInput.checkValidity() && emailInput.value != "") {
+      // this removes the text-box and button from sight
+      // emailInput.style.display = "none";
+      // loginBtn.style.display = "none";
+
+      notification.classList.remove('hidden');
+      notification.classList.add('visible');
+
+      afterLogin.classList.remove('hidden');
+      
+    }else {
+      alert("Please enter a valid email address.");
+    }
+  });
+</script>
+
+<style>
+  .hidden {
+   display: none; 
+  }
+
+  .visible {
+    display: block;
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #d4edda;
+    color: #155724;
+    border-radius: 4px;
+    border: 1px solid #c3e6cb;
+  }
+
+  body {
+    /* 1. Tell the browser to use Flexbox layout */
+    display: flex; 
+    
+    /* 2. Center horizontally */
+    justify-content: center; 
+    
+    /* 3. Center vertically */
+    align-items: center; 
+    
+    /* Extra: Ensure the body takes up the full height of the screen */
+    height: 100vh; 
+    margin: 0;
+  }
+
+  .login-container {
+    display: flex;
+    flex-direction: column; /* Stacks items vertically like a tower */
+    align-items: center;    /* Centers the items inside the tower */
+    gap: 15px;              /* Adds nice even spacing between elements */
+    
+    padding: 40px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Adds a subtle shadow */
+  }
+
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  p {
+    margin: 0;
+  }
+
+</style>
