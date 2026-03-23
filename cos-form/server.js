@@ -16,6 +16,7 @@ async function startServer() {
 
   app.post('/api/submit', (req, res) => {
     try {
+      console.log('Received submission:', req.body);
       const {
         month,
         year,
@@ -48,8 +49,10 @@ async function startServer() {
       ]);
 
       saveDatabase();
-      const result = db.exec("SELECT last_insert_rowid()");
-      res.json({ success: true, id: result[0].values[0][0] });
+      const result = db.exec("SELECT last_insert_rowid() as id");
+      const lastId = result.length > 0 && result[0].values.length > 0 ? result[0].values[0][0] : 0;
+      console.log('Saved submission with ID:', lastId);
+      res.json({ success: true, id: lastId });
     } catch (error) {
       console.error('Error saving submission:', error);
       res.status(500).json({ success: false, error: 'Failed to save submission' });

@@ -174,13 +174,18 @@ document.getElementById('cosForm').addEventListener('submit', async function(e) 
   };
 
   try {
+    console.log('Submitting form data:', formData);
+    
     const response = await fetch('/api/submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData)
     });
 
+    console.log('Response status:', response.status);
     const result = await response.json();
+    console.log('Response:', result);
+    
     if (result.success) {
       alert('Form submitted and saved successfully!');
       resetForm();
@@ -189,7 +194,7 @@ document.getElementById('cosForm').addEventListener('submit', async function(e) 
     }
   } catch (error) {
     console.error('Error:', error);
-    alert('Error submitting form. Please try again.');
+    alert('Error submitting form. Please check if the server is running.');
   }
 });
 
