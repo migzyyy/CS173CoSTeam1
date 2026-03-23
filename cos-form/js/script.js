@@ -147,14 +147,50 @@ function resetForm() {
   updateRemoveButtons();
 }
 
-document.getElementById('cosForm').addEventListener('submit', function(e) {
+document.getElementById('cosForm').addEventListener('submit', async function(e) {
   e.preventDefault();
   if (!hasSignature) {
     alert('Please provide your signature before submitting.');
     return;
   }
-  alert('Form submitted successfully!');
-  resetForm();
+
+  const activities = Array.from(document.querySelectorAll('input[name="activity[]"]')).map(input => input.value);
+  const hoursPerWeek = Array.from(document.querySelectorAll('input[name="hours[]"]')).map(input => input.value);
+  const totalHours = document.getElementById('totalHours').value;
+  const signatureData = canvas.toDataURL();
+
+  const formData = {
+    month: document.getElementById('month').value,
+    year: document.getElementById('year').value,
+    name: document.getElementById('name').value,
+    position: document.getElementById('position').value,
+    college: document.getElementById('college').value,
+    activities: activities,
+    hoursPerWeek: hoursPerWeek,
+    totalHours: totalHours,
+    declarationMonth: document.getElementById('declarationMonth').value,
+    signatureData: signatureData,
+    submissionDate: document.getElementById('sigDate').value
+  };
+
+  try {
+    const response = await fetch('/api/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    });
+
+    const result = await response.json();
+    if (result.success) {
+      alert('Form submitted and saved successfully!');
+      resetForm();
+    } else {
+      alert('Failed to save: ' + result.error);
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Error submitting form. Please try again.');
+  }
 });
 
 updateRemoveButtons();
