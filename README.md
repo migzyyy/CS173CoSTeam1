@@ -32,12 +32,7 @@ A web-based Certificate of Service form application with database storage.
 
 ## Installation
 
-1. Navigate to the project directory:
-   ```bash
-   cd cos-form
-   ```
-
-2. Install dependencies:
+Install dependencies:
    ```bash
    npm install
    ```
