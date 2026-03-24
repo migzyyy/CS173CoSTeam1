@@ -3,96 +3,125 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CS 173 COS_1</title>
+  <title>Certificate of Service</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <div class="login-container">
-    <h2>Login</h2>
-    <div class="input-row">
-      <p>Email Address:</p>
-      <input type="email" id="email-field" placeholder="email@address.com" required>
-      <button id="login-btn">Send!</button>
+  <div class="container">
+    <nav class="top-nav">
+      <a href="history.html" class="nav-link">View Past Entries</a>
+    </nav>
+    <div class="header">
+      <h1>Certificate of Service</h1>
     </div>
-    <div id="notification" class="hidden">
-      Email verification sent! Check your inbox to complete logging in.
-    </div>
-    <a href="homepage.html" id="after-login" class="hidden">Next</a>
+
+    <form id="cosForm">
+      <div class="section">
+        <div class="section-title">Personal Information</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="month">For the Month of:</label>
+            <select id="month" name="month" required>
+              <option value="">Select Month</option>
+              <option value="January">January</option>
+              <option value="February">February</option>
+              <option value="March">March</option>
+              <option value="April">April</option>
+              <option value="May">May</option>
+              <option value="June">June</option>
+              <option value="July">July</option>
+              <option value="August">August</option>
+              <option value="September">September</option>
+              <option value="October">October</option>
+              <option value="November">November</option>
+              <option value="December">December</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="year">Year:</label>
+            <input type="number" id="year" name="year" min="2020" max="2040" value="2026" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+          </div>
+          <div class="form-group">
+            <label for="position">Position:</label>
+            <input type="text" id="position" name="position" placeholder="Enter your position" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="college">College/School of:</label>
+            <input type="text" id="college" name="college" placeholder="Enter college/school name" required>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Service Activities</div>
+        <div class="activities-container" id="activitiesContainer">
+          <div class="activity-card" data-index="0">
+            <button type="button" class="remove-btn" onclick="removeActivity(this)" style="display: none;">&times;</button>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Activities (research, extension, etc.):</label>
+                <input type="text" name="activity[]" placeholder="Describe the activity" required>
+              </div>
+              <div class="form-group" style="max-width: 200px;">
+                <label>Hours per Week:</label>
+                <input type="number" name="hours[]" min="0" max="168" placeholder="0" required>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="add-activity-btn" onclick="addActivity()">
+          <span>+</span> Add Another Activity
+        </button>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Summary</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="totalHours">Total Hours for the Month:</label>
+            <input type="number" id="totalHours" name="totalHours" placeholder="Auto-calculated" readonly>
+          </div>
+        </div>
+      </div>
+
+      <div class="declaration">
+        <div class="declaration-field">
+          <label>I hereby certify upon my honor that I have rendered full service for the month of:</label>
+          <input type="text" id="declarationMonth" name="declarationMonth" placeholder="Enter month (e.g., October)" required>
+        </div>
+        <p id="declarationText">I hereby certify upon my honor that I have rendered full service for the month of <strong id="declarationPreview">_____</strong>.</p>
+
+        <div class="signature-section">
+          <div class="signature-field">
+            <label>Signature:</label>
+            <div class="signature-canvas-container">
+              <canvas id="signatureCanvas" class="signature-canvas"></canvas>
+              <span class="signature-placeholder" id="sigPlaceholder">Click here to sign</span>
+            </div>
+            <button type="button" class="clear-sig-btn" onclick="clearSignature()">Clear Signature</button>
+          </div>
+          <div class="date-field">
+            <label for="sigDate">Date:</label>
+            <input type="date" id="sigDate" name="sigDate" required>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-buttons">
+        <button type="button" class="btn btn-secondary" onclick="resetForm()">Reset</button>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </div>
+    </form>
   </div>
+
+  <script src="js/script.js"></script>
 </body>
 </html>
-
-<script>
-  const loginBtn = document.getElementById('login-btn');
-  const emailInput = document.getElementById('email-field');
-  const notification = document.getElementById('notification');
-  const afterLogin = document.getElementById('after-login');
-  loginBtn.addEventListener('click', () => {
-    if (emailInput.checkValidity() && emailInput.value != "") {
-      // this removes the text-box and button from sight
-      // emailInput.style.display = "none";
-      // loginBtn.style.display = "none";
-
-      notification.classList.remove('hidden');
-      notification.classList.add('visible');
-
-      afterLogin.classList.remove('hidden');
-      
-    }else {
-      alert("Please enter a valid email address.");
-    }
-  });
-</script>
-
-<style>
-  .hidden {
-   display: none; 
-  }
-
-  .visible {
-    display: block;
-    margin-top: 15px;
-    padding: 10px;
-    background-color: #d4edda;
-    color: #155724;
-    border-radius: 4px;
-    border: 1px solid #c3e6cb;
-  }
-
-  body {
-    /* 1. Tell the browser to use Flexbox layout */
-    display: flex; 
-    
-    /* 2. Center horizontally */
-    justify-content: center; 
-    
-    /* 3. Center vertically */
-    align-items: center; 
-    
-    /* Extra: Ensure the body takes up the full height of the screen */
-    height: 100vh; 
-    margin: 0;
-  }
-
-  .login-container {
-    display: flex;
-    flex-direction: column; /* Stacks items vertically like a tower */
-    align-items: center;    /* Centers the items inside the tower */
-    gap: 15px;              /* Adds nice even spacing between elements */
-    
-    padding: 40px;
-    border: 1px solid #ddd;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Adds a subtle shadow */
-  }
-
-  .input-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  p {
-    margin: 0;
-  }
-
-</style>
