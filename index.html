@@ -1,11 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COS 1 - Login</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CS 173 COS_1 - Login</title>
+  <style>
+    body {
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      height: 100vh; 
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+    }
+
+    .login-container {
+      background: white;
+      padding: 40px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 350px;
+    }
+
+    .input-row {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .input-row p {
+      margin: 0;
+      font-weight: bold;
+    }
+
+    input[type="email"] {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 12px;
+      background-color: #0056b3;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #004494;
+    }
+
+    .hidden {
+      display: none !important; 
+    }
+
+    .visible {
+      display: block;
+      margin-top: 15px;
+      padding: 15px;
+      background-color: #d4edda;
+      color: #155724;
+      border-radius: 4px;
+      border: 1px solid #c3e6cb;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
+
+  <div class="login-container">
+    <h2>LOG IN:</h2>
     
+    <div id="input-section" class="input-row">
+      <p>Email Address:</p>
+      <input type="email" id="email-field" placeholder="Emailaddress.com" required>
+      <button id="login-btn">Send Verification</button>
+    </div>
+
+    <div id="notification" class="hidden">
+      <strong>Email verification sent!</strong><br> 
+      Check your inbox to complete logging in.
+      <br><br>
+      <small style="color: #666;">(Simulating email click: Redirecting to homepage in 3s...)</small>
+    </div>
+
+  </div>
+
+  <script>
+    const loginBtn = document.getElementById('login-btn');
+    const emailInput = document.getElementById('email-field');
+    const notification = document.getElementById('notification');
+    const inputSection = document.getElementById('input-section');
+
+    loginBtn.addEventListener('click', () => {
+      // 1. Validate the text box input
+      if (emailInput.checkValidity() && emailInput.value.trim() !== "") {
+        
+        // 2. Hide the email text box and confirm button
+        inputSection.classList.add('hidden');
+        
+        // 3. Show the success notification
+        notification.classList.remove('hidden');
+        notification.classList.add('visible');
+
+        // 4. Transfer the user to the homepage
+        // We use setTimeout to wait 3 seconds so they can read the message first
+        setTimeout(() => {
+          window.location.href = "homepage.html";
+        }, 3000);
+
+      } else {
+        alert("Please enter a valid email address.");
+      }
+    });
+  </script>
+
 </body>
 </html>
