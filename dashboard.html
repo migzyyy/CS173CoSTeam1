@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Certificate of Service</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="container">
+    <nav class="top-nav">
+      <a href="drafts.html" class="nav-link">View Drafts</a>
+      <a href="#" class="nav-link" onclick="logout(event)">Log Out</a>
+    </nav>
+    <div class="header">
+      <h1>Dashboard</h1>
+    </div>
+
+    <div class="action-buttons" style="margin-bottom: 30px; justify-content: center;">
+      <button type="button" class="btn btn-primary" onclick="window.location.href='form.html'">Create New Form</button>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Submitted Entries</div>
+      <div id="entriesContainer">
+        <p class="loading">Loading entries...</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/dashboard.js"></script>
+  <script>
+    function logout(e) {
+      e.preventDefault();
+      if (confirm('Are you sure you want to log out?')) {
+        window.location.href = 'index.html';
+      }
+    }
+  </script>
+</body>
+</html>

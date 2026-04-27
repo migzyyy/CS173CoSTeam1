@@ -14,6 +14,10 @@ async function startServer() {
   await initDatabase();
   const db = getDatabase();
 
+  app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+  });
+
   app.post('/api/submit', (req, res) => {
     try {
       console.log('Received submission:', req.body);
@@ -121,9 +125,95 @@ async function startServer() {
     }
   });
 
+  app.post('/api/drafts', (req, res) => {
+    try {
+      console.log('Received draft:', req.body);
+      const {
+        month,
+        year,
+        name,
+        position,
+        college,
+        activities,
+        hoursPerWeek,
+        totalHours,
+        declarationMonth,
+        signatureData,
+        submissionDate
+      } = req.body;
+
+      db.run(`
+        INSERT INTO drafts (month, year, name, position, college, activities, hours_per_week, total_hours, declaration_month, signature_data, submission_date, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+      `, [
+        month,
+        year,
+        name,
+        position,
+        college,
+        JSON.stringify(activities),
+        JSON.stringify(hoursPerWeek),
+        totalHours,
+        declarationMonth,
+        signatureData,
+        submissionDate
+      ]);
+
+      saveDatabase();
+      const result = db.exec("SELECT last_insert_rowid() as id");
+      const lastId = result.length > 0 && result[0].values.length > 0 ? result[0].values[0][0] : 0;
+      console.log('Saved draft with ID:', lastId);
+      res.json({ success: true, id: lastId });
+    } catch (error) {
+      console.error('Error saving draft:', error);
+      res.status(500).json({ success: false, error: 'Failed to save draft' });
+    }
+  });
+
+  app.get('/api/drafts', (req, res) => {
+    try {
+      const results = db.exec(`
+        SELECT id, month, year, name, position, college, activities, hours_per_week, total_hours, declaration_month, submission_date, created_at
+        FROM drafts
+        ORDER BY created_at DESC
+      `);
+
+      if (results.length === 0) {
+        return res.json([]);
+      }
+
+      const columns = results[0].columns;
+      const drafts = results[0].values.map(row => {
+        const obj = {};
+        columns.forEach((col, i) => {
+          obj[col] = row[i];
+        });
+        obj.activities = JSON.parse(obj.activities);
+        obj.hoursPerWeek = JSON.parse(obj.hours_per_week);
+        return obj;
+      });
+
+      res.json(drafts);
+    } catch (error) {
+      console.error('Error fetching drafts:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch drafts' });
+    }
+  });
+
+  app.delete('/api/drafts/:id', (req, res) => {
+    try {
+      db.run('DELETE FROM drafts WHERE id = ?', [parseInt(req.params.id)]);
+      saveDatabase();
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting draft:', error);
+      res.status(500).json({ success: false, error: 'Failed to delete draft' });
+    }
+  });
+
   app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
-    console.log(`Open http://localhost:${PORT}/index.html in your browser`);
+    console.log(`Open http://localhost:${PORT} in your browser`);
   });
 }
 

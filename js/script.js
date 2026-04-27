@@ -199,3 +199,50 @@ document.getElementById('cosForm').addEventListener('submit', async function(e) 
 });
 
 updateRemoveButtons();
+
+async function saveDraft() {
+  const activities = Array.from(document.querySelectorAll('input[name="activity[]"]')).map(input => input.value);
+  const hoursPerWeek = Array.from(document.querySelectorAll('input[name="hours[]"]')).map(input => input.value);
+  const totalHours = document.getElementById('totalHours').value;
+  const signatureData = canvas.toDataURL();
+
+  const formData = {
+    month: document.getElementById('month').value,
+    year: document.getElementById('year').value,
+    name: document.getElementById('name').value,
+    position: document.getElementById('position').value,
+    college: document.getElementById('college').value,
+    activities: activities,
+    hoursPerWeek: hoursPerWeek,
+    totalHours: totalHours,
+    declarationMonth: document.getElementById('declarationMonth').value,
+    signatureData: signatureData,
+    submissionDate: document.getElementById('sigDate').value
+  };
+
+  try {
+    const response = await fetch('/api/drafts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    });
+
+    const result = await response.json();
+    if (result.success) {
+      alert('Draft saved successfully!');
+      window.location.href = 'dashboard.html';
+    } else {
+      alert('Failed to save draft: ' + result.error);
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Error saving draft. Please check if the server is running.');
+  }
+}
+
+function logout(e) {
+  e.preventDefault();
+  if (confirm('Are you sure you want to log out?')) {
+    window.location.href = 'index.html';
+  }
+}

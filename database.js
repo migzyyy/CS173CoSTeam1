@@ -33,6 +33,24 @@ async function initDatabase() {
     )
   `);
 
+  db.run(`
+    CREATE TABLE IF NOT EXISTS drafts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      month TEXT NOT NULL,
+      year INTEGER NOT NULL,
+      name TEXT NOT NULL,
+      position TEXT NOT NULL,
+      college TEXT NOT NULL,
+      activities TEXT NOT NULL,
+      hours_per_week TEXT NOT NULL,
+      total_hours INTEGER,
+      declaration_month TEXT,
+      signature_data TEXT,
+      submission_date TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
   saveDatabase();
   return db;
 }
