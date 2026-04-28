@@ -208,7 +208,7 @@ app.post('/api/drafts', (req, res) => {
 
 db.run(`
         INSERT INTO drafts (month, year, name, position, college, activities, hours_per_week, total_hours, declaration_month, signature_data, submission_date, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+8 hours'))
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+8 hours'))
       `, [
         month, year, name, position, college,
         JSON.stringify(activities), JSON.stringify(hoursPerWeek),
@@ -337,44 +337,44 @@ app.get('/api/submissions/:id/pdf', (req, res) => {
       doc.pipe(res);
 
       // Title Section (center-aligned)
-      doc.fontSize(16).text('UNIVERSITY OF THE PHILIPPINES', { align: 'center' });
+      doc.fontSize(14).text('UNIVERSITY OF THE PHILIPPINES', { align: 'center' });
       doc.moveDown(0.5);
-      doc.fontSize(14).text('--------------------', { align: 'center' });
+      doc.fontSize(12).text('--------------------', { align: 'center' });
       doc.moveDown(0.5);
-      doc.fontSize(18).font('Helvetica-Bold').text('CERTIFICATE OF SERVICE', { align: 'center' });
+      doc.fontSize(16).font('Helvetica-Bold').text('CERTIFICATE OF SERVICE', { align: 'center' });
       doc.moveDown();
 
       // For the month of
-      doc.fontSize(14).font('Helvetica').text(`For the month of ${row.month || ''}`);
+      doc.fontSize(12).font('Helvetica').text(`For the month of ${row.month || ''}`, { align: 'center' });
       doc.moveDown();
 
       // Personal Information
-      doc.fontSize(14).text('Name: ' + (row.name || ''));
+      doc.fontSize(12).text('Name: ' + (row.name || ''));
       doc.text('Position: ' + (row.position || ''));
       doc.text('College/School of: ' + (row.college || ''));
       doc.moveDown();
 
       // Service Activities
-      doc.fontSize(14).text('Service Activities:', { underline: true });
+      doc.fontSize(12).text('Service Activities:', { underline: true });
       doc.moveDown(0.5);
       if (row.activities && row.activities.length > 0) {
         row.activities.forEach((activity, index) => {
           const hours = row.hoursPerWeek && row.hoursPerWeek[index] ? row.hoursPerWeek[index] : '';
-          doc.fontSize(12).text(`${index + 1}. ${activity} (${hours} hrs/week)`);
+          doc.fontSize(10).text(`${index + 1}. ${activity} (${hours} hrs/week)`);
         });
       }
       doc.moveDown();
 
       // Separator
-      doc.fontSize(14).text('--------------------', { align: 'center' });
+      doc.fontSize(12).text('--------------------', { align: 'center' });
       doc.moveDown();
 
       // Declaration
-      doc.fontSize(14).text(`I hereby certify upon my honor that I have rendered full service for the month of ${row.declaration_month || row.month}.`);
+      doc.fontSize(12).text(`I hereby certify upon my honor that I have rendered full service for the month of ${row.declaration_month || row.month}.`);
       doc.moveDown();
 
       // Signature Section
-      doc.fontSize(14).text('Signature:', { underline: true });
+      doc.fontSize(12).text('Signature:', { underline: true });
       if (row.signature_data) {
         try {
           const base64Data = row.signature_data.replace(/^data:image\/png;base64,/, '');
@@ -385,17 +385,17 @@ app.get('/api/submissions/:id/pdf', (req, res) => {
         }
       }
       doc.moveDown(0.5);
-      doc.fontSize(14).text((row.name || ''));
+      doc.fontSize(12).text((row.name || ''));
       doc.moveDown();
 
       // Attested/Approved Section
-      doc.fontSize(14).text('Attested:', { underline: true });
+      doc.fontSize(12).text('Attested:', { underline: true });
+      doc.moveDown(2); 
+      doc.fontSize(12).text('Chairman, Department of Computer Science');
+      doc.moveDown(2); 
+      doc.fontSize(12).text('Approved:', { underline: true });
       doc.moveDown(2);
-      doc.fontSize(14).text('Chairman, Department of Computer Science');
-      doc.moveDown(2);
-      doc.fontSize(14).text('Approved:', { underline: true });
-      doc.moveDown(2);
-      doc.fontSize(14).text('Dean, College of Engineering');
+      doc.fontSize(12).text('Dean, College of Engineering');
       doc.moveDown(2); 
 
       doc.end();
