@@ -188,6 +188,15 @@ document.getElementById('cosForm').addEventListener('submit', async function(e) 
     
     if (result.success) {
       alert('Form submitted and saved successfully!');
+      
+      // Check if we're editing a draft, if so delete it
+      const urlParams = new URLSearchParams(window.location.search);
+      const draftId = urlParams.get('draft');
+      
+      if (draftId) {
+        await fetch(`/api/drafts/${draftId}`, { method: 'DELETE' });
+      }
+      
       window.location.href = 'dashboard.html';
     } else {
       alert('Failed to save: ' + result.error);
