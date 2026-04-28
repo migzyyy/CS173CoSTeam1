@@ -16,6 +16,8 @@
   <div class="container">
     <div class="top-nav">
       <a href="#" class="nav-link cancel" onclick="cancelForm(event)">Cancel</a>
+      <input type="file" id="jsonFileInput" accept=".json" style="display: none;" onchange="loadJSONFile(event)">
+      <button onclick="document.getElementById('jsonFileInput').click()" class="nav-link" style="margin-left: 10px;">Upload JSON</button>
     </div>
     <div class="header">
       <h1>Certificate of Service</h1>
@@ -199,6 +201,68 @@
       if (confirm('Are you sure you want to cancel? Any unsaved changes will be lost.')) {
         window.location.href = 'dashboard.html';
       }
+    }
+
+    function loadJSONFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+
+          // Fill personal information
+          if (data.month) document.getElementById('month').value = data.month;
+          if (data.year) document.getElementById('year').value = data.year;
+          if (data.name) document.getElementById('name').value = data.name;
+          if (data.position) document.getElementById('position').value = data.position;
+          if (data.college) document.getElementById('college').value = data.college;
+          if (data.totalHours) document.getElementById('totalHours').value = data.totalHours;
+          if (data.declarationMonth) {
+            document.getElementById('declarationMonth').value = data.declarationMonth;
+            document.getElementById('declarationPreview').textContent = data.declarationMonth;
+          }
+          if (data.submissionDate) document.getElementById('sigDate').value = data.submissionDate;
+
+          // Fill activities
+          if (data.activities && data.activities.length > 0) {
+            const container = document.getElementById('activitiesContainer');
+            container.innerHTML = '';
+            data.activities.forEach((activity, index) => {
+              const hours = data.hoursPerWeek && data.hoursPerWeek[index] ? data.hoursPerWeek[index] : '';
+              const card = document.createElement('div');
+              card.className = 'activity-card';
+              card.dataset.index = index;
+              card.innerHTML = `
+                <button type="button" class="remove-btn" onclick="removeActivity(this)">&times;</button>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Activities (research, extension, etc.):</label>
+                    <input type="text" name="activity[]" value="${activity}" required>
+                  </div>
+                  <div class="form-group" style="max-width: 200px;">
+                    <label>Hours per Week:</label>
+                    <input type="number" name="hours[]" min="0" max="168" value="${hours}" oninput="calculateTotal()" required>
+                  </div>
+                </div>
+              `;
+              container.appendChild(card);
+            });
+            updateRemoveButtons();
+            calculateTotal();
+          }
+
+          alert('Form loaded successfully from JSON file!');
+        } catch (error) {
+          alert('Error reading JSON file. Please make sure it is a valid JSON file.');
+          console.error('JSON load error:', error);
+        }
+      };
+      reader.readAsText(file);
+
+      // Reset file input so the same file can be uploaded again
+      event.target.value = '';
     }
   </script>
 </body>

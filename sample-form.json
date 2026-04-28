@@ -1,0 +1,12 @@
+{
+  "month": "October",
+  "year": 2026,
+  "name": "John Doe",
+  "position": "Professor",
+  "college": "College of Engineering",
+  "activities": ["Research work", "Extension services", "Administrative tasks"],
+  "hoursPerWeek": [10, 15, 5],
+  "totalHours": 120,
+  "declarationMonth": "October",
+  "submissionDate": "2026-10-31"
+}
