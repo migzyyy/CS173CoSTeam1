@@ -10,7 +10,7 @@
   <div class="container">
     <nav class="top-nav">
       <a href="drafts.html" class="nav-link">View Drafts</a>
-      <a href="#" class="nav-link" onclick="logout(event)">Log Out</a>
+      <a href="/api/logout" class="nav-link">Log Out</a>
     </nav>
     <div class="header">
       <h1>Dashboard</h1>
@@ -28,14 +28,12 @@
     </div>
   </div>
 
-  <script src="js/dashboard.js"></script>
   <script>
-    function logout(e) {
-      e.preventDefault();
-      if (confirm('Are you sure you want to log out?')) {
-        window.location.href = 'index.html';
-      }
+    // Simple auth check - if no cookie, redirect to login
+    if (!document.cookie.includes('user_email')) {
+      window.location.href = '/';
     }
   </script>
+  <script src="js/dashboard.js"></script>
 </body>
 </html>

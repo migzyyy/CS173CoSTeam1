@@ -7,6 +7,12 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <script>
+    // Simple auth check - if no cookie, redirect to login
+    if (!document.cookie.includes('user_email')) {
+      window.location.href = '/';
+    }
+  </script>
   <div class="container">
     <a href="dashboard.html" class="back-link">← Back to Dashboard</a>
     <div class="header">

@@ -188,7 +188,7 @@ document.getElementById('cosForm').addEventListener('submit', async function(e) 
     
     if (result.success) {
       alert('Form submitted and saved successfully!');
-      resetForm();
+      window.location.href = 'dashboard.html';
     } else {
       alert('Failed to save: ' + result.error);
     }
@@ -221,11 +221,26 @@ async function saveDraft() {
   };
 
   try {
-    const response = await fetch('/api/drafts', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData)
-    });
+    // Check if we're editing a draft
+    const urlParams = new URLSearchParams(window.location.search);
+    const draftId = urlParams.get('draft');
+    
+    let response;
+    if (draftId) {
+      // Update existing draft
+      response = await fetch(`/api/drafts/${draftId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+    } else {
+      // Create new draft
+      response = await fetch('/api/drafts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+    }
 
     const result = await response.json();
     if (result.success) {
@@ -242,7 +257,5 @@ async function saveDraft() {
 
 function logout(e) {
   e.preventDefault();
-  if (confirm('Are you sure you want to log out?')) {
-    window.location.href = 'index.html';
-  }
+  window.location.href = '/api/logout';
 }

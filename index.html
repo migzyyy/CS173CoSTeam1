@@ -3,98 +3,145 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CS 173 COS_1 - Login</title>
+  <title>Login - Certificate of Service</title>
   <style>
-    body {
-      display: flex; 
-      justify-content: center; 
-      align-items: center; 
-      height: 100vh; 
+    * {
+      box-sizing: border-box;
       margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f9;
+      padding: 0;
     }
+
+    body {
+      font-family: 'Times New Roman', Times, serif;
+      background: #f5f5f5;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
     .login-container {
       background: white;
-      padding: 40px;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      padding: 50px 60px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
       width: 100%;
-      max-width: 350px;
+      max-width: 400px;
+      text-align: center;
     }
-    .input-row { display: flex; flex-direction: column; gap: 15px; }
-    .input-row p { margin: 0; font-weight: bold; }
-    input[type="email"] { padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; }
-    button { padding: 12px; background-color: #0056b3; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: bold; }
-    button:hover { background-color: #004494; }
-    .hidden { display: none !important; }
-    .visible {
-      display: block; margin-top: 15px; padding: 15px; background-color: #d4edda;
-      color: #155724; border-radius: 4px; border: 1px solid #c3e6cb; text-align: center;
+
+    .login-container h1 {
+      font-size: 24px;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-bottom: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #333;
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px 40px;
+      font-size: 16px;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      background: #007bff;
+      color: white;
+    }
+
+    .btn:hover {
+      background: #0056b3;
+    }
+
+    .message {
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 4px;
+      display: none;
+    }
+
+    .message.success {
+      display: block;
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .message.error {
+      display: block;
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
     }
   </style>
 </head>
 <body>
-
   <div class="login-container">
-    <h2>LOG IN:</h2>
-    
-    <div id="input-section" class="input-row">
-      <p>Email Address:</p>
-      <input type="email" id="email-field" placeholder="Emailaddress.com" required>
-      <button id="login-btn">Send Verification</button>
-    </div>
-
-    <div id="notification" class="hidden">
-      <strong>Email verification sent!</strong><br><br>
-      Check your inbox and click the secure link to log in. You can close this page.
-    </div>
+    <h1>Login</h1>
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="email">Email Address:</label>
+        <input type="email" id="email" name="email" placeholder="Enter your email" required>
+      </div>
+      <button type="submit" class="btn">Send Verification Link</button>
+    </form>
+    <div id="message" class="message"></div>
   </div>
 
   <script>
-    const loginBtn = document.getElementById('login-btn');
-    const emailInput = document.getElementById('email-field');
-    const notification = document.getElementById('notification');
-    const inputSection = document.getElementById('input-section');
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const messageDiv = document.getElementById('message');
+      const btn = this.querySelector('button');
 
-    loginBtn.addEventListener('click', async () => {
-      const email = emailInput.value.trim();
+      btn.textContent = 'Sending...';
+      btn.disabled = true;
 
-      if (emailInput.checkValidity() && email !== "") {
-        
-        loginBtn.innerText = "Sending...";
-        loginBtn.disabled = true;
+      try {
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email })
+        });
 
-        try {
-          // THIS is the line that connects to your server.js!
-          const response = await fetch('/api/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: email })
-          });
+        const result = await response.json();
 
-          if (response.ok) {
-            // Success! The server successfully emailed SendGrid.
-            inputSection.classList.add('hidden');
-            notification.classList.remove('hidden');
-            notification.classList.add('visible');
-          } else {
-            alert("Server rejected the request. Check your server console for errors.");
-            loginBtn.innerText = "Send Verification";
-            loginBtn.disabled = false;
-          }
-        } catch (error) {
-          console.error("Network error:", error);
-          alert("Could not connect to the server. Is server.js running?");
-          loginBtn.innerText = "Send Verification";
-          loginBtn.disabled = false;
+        if (response.ok) {
+          messageDiv.className = 'message success';
+          messageDiv.innerHTML = 'Verification email sent! Please check your inbox.';
+          document.getElementById('loginForm').reset();
+        } else {
+          messageDiv.className = 'message error';
+          messageDiv.textContent = result.error || 'Failed to send email.';
         }
-
-      } else {
-        alert("Please enter a valid email address.");
+      } catch (error) {
+        messageDiv.className = 'message error';
+        messageDiv.textContent = 'Error sending email. Please try again.';
+      } finally {
+        btn.textContent = 'Send Verification Link';
+        btn.disabled = false;
       }
     });
   </script>
-
 </body>
 </html>

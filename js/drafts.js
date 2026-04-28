@@ -28,6 +28,7 @@ async function loadDrafts() {
         <p><strong>Last saved:</strong> ${new Date(draft.created_at).toLocaleString()}</p>
         <div class="entry-meta">
           <span>Draft #${draft.id}</span>
+          <button class="btn-edit" onclick="editDraft(${draft.id})">Edit</button>
           <button class="btn-delete" onclick="deleteDraft(${draft.id})">Delete</button>
         </div>
       </div>
@@ -55,6 +56,10 @@ async function deleteDraft(id) {
     console.error('Error:', error);
     alert('Error deleting draft');
   }
+}
+
+function editDraft(id) {
+  window.location.href = `form.html?draft=${id}`;
 }
 
 loadDrafts();
