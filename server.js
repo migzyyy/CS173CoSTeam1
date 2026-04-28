@@ -5,6 +5,7 @@ const path = require('path');
 const crypto = require('crypto');
 const sgMail = require('@sendgrid/mail');
 const cookieParser = require('cookie-parser');
+const PDFDocument = require('pdfkit');
 const { initDatabase, getDatabase, saveDatabase } = require('./database');
 
 const app = express();
@@ -309,6 +310,99 @@ app.post('/api/drafts', (req, res) => {
     } catch (error) {
       console.error('Error fetching draft:', error);
       res.status(500).json({ success: false, error: 'Failed to fetch draft' });
+    }
+  });
+
+app.get('/api/submissions/:id/pdf', (req, res) => {
+    try {
+      const stmt = db.prepare("SELECT * FROM submissions WHERE id = ?");
+      stmt.bind([parseInt(req.params.id)]);
+
+      if (!stmt.step()) {
+        stmt.free();
+        return res.status(404).json({ success: false, error: 'Submission not found' });
+      }
+
+      const row = stmt.getAsObject();
+      stmt.free();
+
+      row.activities = JSON.parse(row.activities);
+      row.hoursPerWeek = JSON.parse(row.hours_per_week);
+
+      const PDFDocument = require('pdfkit');
+      const doc = new PDFDocument({ margin: 50 });
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="COS_${row.name}_${row.month}_${row.year}.pdf"`);
+
+      doc.pipe(res);
+
+      // Title Section (center-aligned)
+      doc.fontSize(14).text('UNIVERSITY OF THE PHILIPPINES', { align: 'center' });
+      doc.moveDown(0.5);
+      doc.fontSize(12).text('--------------------', { align: 'center' });
+      doc.moveDown(0.5);
+      doc.fontSize(16).font('Helvetica-Bold').text('CERTIFICATE OF SERVICE', { align: 'center' });
+      doc.moveDown();
+
+      // For the month of
+      doc.fontSize(12).font('Helvetica').text(`For the month of ${row.month || ''}`, { align: 'center' });
+      doc.moveDown();
+
+      // Personal Information
+      doc.fontSize(12).text('Name: ' + (row.name || ''));
+      doc.text('Position: ' + (row.position || ''));
+      doc.text('College/School of: ' + (row.college || ''));
+      doc.moveDown();
+
+      // Service Activities
+      doc.fontSize(12).text('Service Activities:', { underline: true });
+      doc.moveDown(0.5);
+      if (row.activities && row.activities.length > 0) {
+        row.activities.forEach((activity, index) => {
+          const hours = row.hoursPerWeek && row.hoursPerWeek[index] ? row.hoursPerWeek[index] : '';
+          doc.fontSize(10).text(`${index + 1}. ${activity} (${hours} hrs/week)`);
+        });
+      }
+      doc.moveDown();
+
+      // Separator
+      doc.fontSize(12).text('--------------------', { align: 'center' });
+      doc.moveDown();
+
+      // Declaration
+      doc.fontSize(12).text(`I hereby certify upon my honor that I have rendered full service for the month of ${row.declaration_month || row.month}.`);
+      doc.moveDown();
+
+      // Signature Section
+      doc.fontSize(12).text('Signature:', { underline: true });
+      if (row.signature_data) {
+        try {
+          const base64Data = row.signature_data.replace(/^data:image\/png;base64,/, '');
+          const imgBuffer = Buffer.from(base64Data, 'base64');
+          doc.image(imgBuffer, { width: 200 });
+        } catch (e) {
+          console.error('Error adding signature to PDF:', e);
+        }
+      }
+      doc.moveDown(0.5);
+      doc.fontSize(12).text((row.name || ''));
+      doc.moveDown();
+
+      // Attested/Approved Section
+      doc.fontSize(12).text('Attested:', { underline: true });
+      doc.moveDown(2); 
+      doc.fontSize(12).text('Chairman, Department of Computer Science');
+      doc.moveDown(2); 
+      doc.fontSize(12).text('Approved:', { underline: true });
+      doc.moveDown(2);
+      doc.fontSize(12).text('Dean, College of Engineering');
+      doc.moveDown(2); 
+
+      doc.end();
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      res.status(500).json({ success: false, error: 'Failed to generate PDF' });
     }
   });
 

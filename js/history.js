@@ -29,6 +29,7 @@ async function loadEntries() {
         <p><strong>Submitted:</strong> ${new Date(entry.created_at).toLocaleString()}</p>
         <div class="entry-meta">
           <span>Entry #${entry.id}</span>
+          <button class="btn-edit" onclick="downloadPDF(${entry.id})">Download PDF</button>
           <button class="btn-delete" onclick="deleteEntry(${entry.id})">Delete</button>
         </div>
       </div>
@@ -48,7 +49,11 @@ async function deleteEntry(id) {
     const result = await response.json();
     
     if (result.success) {
-      loadEntries();
+loadEntries();
+
+function downloadPDF(id) {
+  window.open(`/api/submissions/${id}/pdf`, '_blank');
+}
     } else {
       alert('Failed to delete entry');
     }
@@ -59,3 +64,7 @@ async function deleteEntry(id) {
 }
 
 loadEntries();
+
+function downloadPDF(id) {
+  window.open(`/api/submissions/${id}/pdf`, '_blank');
+}
