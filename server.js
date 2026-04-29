@@ -49,7 +49,10 @@ async function startServer() {
       );
       saveDatabase();
 
-      const magicLink = `http://localhost:${PORT}/verify?token=${token}`;
+      // This tells the server: "If there is a BASE_URL in the .env file, use it. 
+      // Otherwise, fall back to localhost for local development."
+      const baseUrl = process.env.BASE_URL || `http://localhost:${PORT}`;
+      const magicLink = `${baseUrl}/verify?token=${token}`;
 
       const msg = {
         to: email,
@@ -96,7 +99,7 @@ async function startServer() {
       res.cookie('user_email', email, {
         maxAge: 24 * 60 * 60 * 1000,
         httpOnly: false,
-        secure: false
+        secure: true
       });
 
       res.redirect('/dashboard.html');
