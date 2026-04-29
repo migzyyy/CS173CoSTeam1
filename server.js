@@ -41,7 +41,8 @@ async function startServer() {
       if (!email) return res.status(400).json({ error: 'Email is required' });
 
       const token = crypto.randomBytes(32).toString('hex');
-      const expiresAt = Date.now() + (15 * 60 * 1000);
+      // CREATE AN ISO STRING FOR EXACTLY 15 MINUTES IN THE FUTURE
+      const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
 
       db.run(
         `INSERT INTO auth_tokens (email, token, expires_at) VALUES (?, ?, datetime('now', '+8 hours'))`,
@@ -89,7 +90,8 @@ async function startServer() {
       const email = row[0];
       const expiresAt = row[2];
 
-      if (Date.now() > parseInt(expiresAt)) {
+      // BULLETPROOF COMPARISON: Convert both to Dates and compare
+      if (new Date() > new Date(expiresAt)) {
         return res.status(400).send('Link has expired. Please request a new one.');
       }
 
