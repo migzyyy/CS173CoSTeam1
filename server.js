@@ -52,7 +52,7 @@ async function startServer() {
       // This tells the server: "If there is a BASE_URL in the .env file, use it. 
       // Otherwise, fall back to localhost for local development."
       const baseUrl = process.env.BASE_URL || `http://localhost:${PORT}`;
-      const magicLink = `${baseUrl}/verify?token=${token}`;
+      const magicLink = `${baseUrl}/api/verify?token=${token}`;
 
       const msg = {
         to: email,
@@ -73,7 +73,7 @@ async function startServer() {
   });
 
   // Verify token from email link
-  app.get('/verify', (req, res) => {
+  app.get('/api/verify', (req, res) => {
     const { token } = req.query;
 
     if (!token) return res.status(400).send('Invalid link.');
