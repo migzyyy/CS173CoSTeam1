@@ -45,8 +45,8 @@ async function startServer() {
       const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
 
       db.run(
-        `INSERT INTO auth_tokens (email, token, expires_at) VALUES (?, ?, datetime('now', '+8 hours'))`,
-        [email, token]
+        `INSERT INTO auth_tokens (email, token, expires_at) VALUES (?, ?, ?)`,
+        [email, token, expiresAt]
       );
       saveDatabase();
 
