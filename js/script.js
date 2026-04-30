@@ -233,7 +233,7 @@ async function saveDraft() {
     // Check if we're editing a draft
     const urlParams = new URLSearchParams(window.location.search);
     const draftId = urlParams.get('draft');
-    
+
     let response;
     if (draftId) {
       // Update existing draft

@@ -1,0 +1,12 @@
+{
+  "month": "January",
+  "year": 2028,
+  "name": "Miguel Joaquin Millora",
+  "position": "Professor",
+  "college": "College of Engineering",
+  "activities": ["CS 198", "CS 133", "CS 155"],
+  "hoursPerWeek": [10, 15, 5],
+  "totalHours": 120,
+  "declarationMonth": "October",
+  "submissionDate": "2026-10-31"
+}
