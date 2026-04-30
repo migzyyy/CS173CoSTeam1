@@ -40,8 +40,7 @@ async function startServer() {
       if (!email) return res.status(400).json({ error: 'Email is required' });
 
       const token = crypto.randomBytes(32).toString('hex');
-      const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
-
+      
       db.run(
         `INSERT INTO auth_tokens (email, token, expires_at) VALUES (?, ?, datetime('now', '+8 hours'))`,
         [email, token]
@@ -110,34 +109,39 @@ async function startServer() {
     res.redirect('/');
   });
 
+  // Submit form
   app.post('/api/submit', (req, res) => {
-    try {
+try {
       console.log('Received submission:', req.body);
       const {
         month, year, name, position, college, activities,
         hoursPerWeek, totalHours, declarationMonth, signatureData, submissionDate
       } = req.body;
 
-      db.run(`
+      const sql = `
         INSERT INTO submissions (month, year, name, position, college, activities, hours_per_week, total_hours, declaration_month, signature_data, submission_date, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+8 hours'))
-      `, [
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+8 hours'))
+      `;
+      const params = [
         month, year, name, position, college,
         JSON.stringify(activities), JSON.stringify(hoursPerWeek),
         totalHours, declarationMonth, signatureData, submissionDate
-      ]);
-
+      ];
+      
+      db.run(sql, params);
       saveDatabase();
+      
       const result = db.exec("SELECT last_insert_rowid() as id");
       const lastId = result.length > 0 && result[0].values.length > 0 ? result[0].values[0][0] : 0;
       console.log('Saved submission with ID:', lastId);
       res.json({ success: true, id: lastId });
     } catch (error) {
       console.error('Error saving submission:', error);
-      res.status(500).json({ success: false, error: 'Failed to save submission' });
+      res.status(500).json({ success: false, error: error.message });
     }
   });
 
+  // Get all submissions
   app.get('/api/submissions', (req, res) => {
     try {
       const results = db.exec(`
@@ -164,6 +168,7 @@ async function startServer() {
     }
   });
 
+  // Get single submission
   app.get('/api/submissions/:id', (req, res) => {
     try {
       const stmt = db.prepare("SELECT * FROM submissions WHERE id = ?");
@@ -171,9 +176,9 @@ async function startServer() {
 
       if (stmt.step()) {
         const row = stmt.getAsObject();
+        stmt.free();
         row.activities = JSON.parse(row.activities);
         row.hoursPerWeek = JSON.parse(row.hours_per_week);
-        stmt.free();
         res.json(row);
       } else {
         stmt.free();
@@ -185,6 +190,7 @@ async function startServer() {
     }
   });
 
+  // Delete submission
   app.delete('/api/submissions/:id', (req, res) => {
     try {
       db.run('DELETE FROM submissions WHERE id = ?', [parseInt(req.params.id)]);
@@ -196,120 +202,7 @@ async function startServer() {
     }
   });
 
-  app.post('/api/drafts', (req, res) => {
-    try {
-      console.log('Received draft:', req.body);
-      const {
-        month, year, name, position, college, activities,
-        hoursPerWeek, totalHours, declarationMonth, signatureData, submissionDate
-      } = req.body;
-
-      db.run(`
-        INSERT INTO drafts (month, year, name, position, college, activities, hours_per_week, total_hours, declaration_month, signature_data, submission_date, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+8 hours'))
-      `, [
-        month, year, name, position, college,
-        JSON.stringify(activities), JSON.stringify(hoursPerWeek),
-        totalHours, declarationMonth, signatureData, submissionDate
-      ]);
-
-      saveDatabase();
-      const result = db.exec("SELECT last_insert_rowid() as id");
-      const lastId = result.length > 0 && result[0].values.length > 0 ? result[0].values[0][0] : 0;
-      console.log('Saved draft with ID:', lastId);
-      res.json({ success: true, id: lastId });
-    } catch (error) {
-      console.error('Error saving draft:', error);
-      res.status(500).json({ success: false, error: 'Failed to save draft' });
-    }
-  });
-
-  // Update existing draft
-  app.put('/api/drafts/:id', (req, res) => {
-    try {
-      const {
-        month, year, name, position, college, activities,
-        hoursPerWeek, totalHours, declarationMonth, signatureData, submissionDate
-      } = req.body;
-
-      db.run(`
-        UPDATE drafts
-        SET month=?, year=?, name=?, position=?, college=?, activities=?, hours_per_week=?, total_hours=?, declaration_month=?, signature_data=?, submission_date=?
-        WHERE id=?
-      `, [
-        month, year, name, position, college,
-        JSON.stringify(activities), JSON.stringify(hoursPerWeek),
-        totalHours, declarationMonth, signatureData, submissionDate,
-        parseInt(req.params.id)
-      ]);
-
-      saveDatabase();
-      console.log('Updated draft with ID:', req.params.id);
-      res.json({ success: true });
-    } catch (error) {
-      console.error('Error updating draft:', error);
-      res.status(500).json({ success: false, error: 'Failed to update draft' });
-    }
-  });
-
-  app.get('/api/drafts', (req, res) => {
-    try {
-      const results = db.exec(`
-        SELECT id, month, year, name, position, college, activities, hours_per_week, total_hours, declaration_month, submission_date, created_at
-        FROM drafts
-        ORDER BY created_at DESC
-      `);
-
-      if (results.length === 0) return res.json([]);
-
-      const columns = results[0].columns;
-      const drafts = results[0].values.map(row => {
-        const obj = {};
-        columns.forEach((col, i) => { obj[col] = row[i]; });
-        obj.activities = JSON.parse(obj.activities);
-        obj.hoursPerWeek = JSON.parse(obj.hours_per_week);
-        return obj;
-      });
-
-      res.json(drafts);
-    } catch (error) {
-      console.error('Error fetching drafts:', error);
-      res.status(500).json({ success: false, error: 'Failed to fetch drafts' });
-    }
-  });
-
-  app.get('/api/drafts/:id', (req, res) => {
-    try {
-      const stmt = db.prepare("SELECT * FROM drafts WHERE id = ?");
-      stmt.bind([parseInt(req.params.id)]);
-
-      if (stmt.step()) {
-        const row = stmt.getAsObject();
-        row.activities = JSON.parse(row.activities);
-        row.hoursPerWeek = JSON.parse(row.hours_per_week);
-        stmt.free();
-        res.json(row);
-      } else {
-        stmt.free();
-        res.status(404).json({ success: false, error: 'Draft not found' });
-      }
-    } catch (error) {
-      console.error('Error fetching draft:', error);
-      res.status(500).json({ success: false, error: 'Failed to fetch draft' });
-    }
-  });
-
-  app.delete('/api/drafts/:id', (req, res) => {
-    try {
-      db.run('DELETE FROM drafts WHERE id = ?', [parseInt(req.params.id)]);
-      saveDatabase();
-      res.json({ success: true });
-    } catch (error) {
-      console.error('Error deleting draft:', error);
-      res.status(500).json({ success: false, error: 'Failed to delete draft' });
-    }
-  });
-
+  // Download PDF
   app.get('/api/submissions/:id/pdf', (req, res) => {
     try {
       const stmt = db.prepare("SELECT * FROM submissions WHERE id = ?");
@@ -395,6 +288,45 @@ async function startServer() {
     } catch (error) {
       console.error('Error generating PDF:', error);
       res.status(500).json({ success: false, error: 'Failed to generate PDF' });
+    }
+  });
+
+  // Download JSON
+  app.get('/api/submissions/:id/json', (req, res) => {
+    try {
+      const stmt = db.prepare("SELECT * FROM submissions WHERE id = ?");
+      stmt.bind([parseInt(req.params.id)]);
+
+      if (!stmt.step()) {
+        stmt.free();
+        return res.status(404).json({ success: false, error: 'Submission not found' });
+      }
+
+      const row = stmt.getAsObject();
+      stmt.free();
+
+      row.activities = JSON.parse(row.activities);
+      row.hoursPerWeek = JSON.parse(row.hours_per_week);
+
+      const jsonData = JSON.stringify({
+        month: row.month,
+        year: row.year,
+        name: row.name,
+        position: row.position,
+        college: row.college,
+        activities: row.activities,
+        hoursPerWeek: row.hoursPerWeek,
+        totalHours: row.total_hours,
+        declarationMonth: row.declaration_month,
+        submissionDate: row.submission_date
+      }, null, 2);
+
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', `attachment; filename="COS_${row.name}_${row.month}_${row.year}.json"`);
+      res.send(jsonData);
+    } catch (error) {
+      console.error('Error generating JSON:', error);
+      res.status(500).json({ success: false, error: 'Failed to generate JSON' });
     }
   });
 

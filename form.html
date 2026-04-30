@@ -129,7 +129,6 @@
 
       <div class="action-buttons">
         <button type="button" class="btn btn-secondary" onclick="resetForm()">Reset</button>
-        <button type="button" class="btn btn-secondary" onclick="saveDraft()">Save as Draft</button>
         <button type="submit" class="btn btn-primary">Submit</button>
       </div>
     </form>
@@ -137,65 +136,6 @@
 
   <script src="js/script.js"></script>
   <script>
-    // Check if we're editing a draft
-    const urlParams = new URLSearchParams(window.location.search);
-    const draftId = urlParams.get('draft');
-
-    if (draftId) {
-      // Load draft data
-      fetch(`/api/drafts/${draftId}`)
-        .then(res => res.json())
-        .then(draft => {
-          // Populate form fields
-          document.getElementById('month').value = draft.month || '';
-          document.getElementById('year').value = draft.year || 2026;
-          document.getElementById('name').value = draft.name || '';
-          document.getElementById('position').value = draft.position || '';
-          document.getElementById('college').value = draft.college || '';
-          document.getElementById('totalHours').value = draft.total_hours || '';
-          document.getElementById('declarationMonth').value = draft.declaration_month || '';
-          document.getElementById('sigDate').value = draft.submission_date || '';
-
-          // Load activities
-          const container = document.getElementById('activitiesContainer');
-          container.innerHTML = '';
-          if (draft.activities && draft.activities.length > 0) {
-            draft.activities.forEach((activity, index) => {
-              const hours = draft.hoursPerWeek && draft.hoursPerWeek[index] ? draft.hoursPerWeek[index] : '';
-              const card = document.createElement('div');
-              card.className = 'activity-card';
-              card.dataset.index = index;
-              card.innerHTML = `
-                <button type="button" class="remove-btn" onclick="removeActivity(this)">&times;</button>
-                <div class="form-row">
-                  <div class="form-group">
-                    <label>Activities (research, extension, etc.):</label>
-                    <input type="text" name="activity[]" value="${activity}" required>
-                  </div>
-                  <div class="form-group" style="max-width: 200px;">
-                    <label>Hours per Week:</label>
-                    <input type="number" name="hours[]" min="0" max="168" value="${hours}" oninput="calculateTotal()" required>
-                  </div>
-                </div>
-              `;
-              container.appendChild(card);
-            });
-            updateRemoveButtons();
-            calculateTotal();
-          }
-
-          // Update declaration preview
-          const preview = document.getElementById('declarationPreview');
-          if (draft.declaration_month) {
-            preview.textContent = draft.declaration_month;
-          }
-
-          // Change form title to indicate editing
-          document.querySelector('.header h1').textContent = 'Edit Draft';
-        })
-        .catch(err => console.error('Error loading draft:', err));
-    }
-
     function cancelForm(e) {
       e.preventDefault();
       if (confirm('Are you sure you want to cancel? Any unsaved changes will be lost.')) {

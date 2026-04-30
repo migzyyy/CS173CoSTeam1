@@ -30,6 +30,7 @@ async function loadEntries() {
         <div class="entry-meta">
           <span>Entry #${entry.id}</span>
           <button class="btn-edit" onclick="downloadPDF(${entry.id})">Download PDF</button>
+          <button class="btn-edit" onclick="downloadJSON(${entry.id})">Download JSON</button>
           <button class="btn-delete" onclick="deleteEntry(${entry.id})">Delete</button>
         </div>
       </div>
@@ -54,13 +55,9 @@ loadEntries();
 function downloadPDF(id) {
   window.open(`/api/submissions/${id}/pdf`, '_blank');
 }
-    } else {
-      alert('Failed to delete entry');
-    }
-  } catch (error) {
-    console.error('Error:', error);
-    alert('Error deleting entry');
-  }
+
+function downloadJSON(id) {
+  window.open(`/api/submissions/${id}/json`, '_blank');
 }
 
 loadEntries();
