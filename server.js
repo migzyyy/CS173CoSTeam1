@@ -33,73 +33,74 @@ async function startServer() {
     res.sendFile(path.join(__dirname, 'index.html'));
   });
 
-  // Login - send magic link
+  // 1. Send the OTP Code
   app.post('/api/login', async (req, res) => {
     try {
       const { email } = req.body;
       if (!email) return res.status(400).json({ error: 'Email is required' });
 
-      const token = crypto.randomBytes(32).toString('hex');
-      
+      // Generate a 6-digit random code
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiresAt = Date.now() + (10 * 60 * 1000); // Expires in 10 mins
+
       db.run(
-        `INSERT INTO auth_tokens (email, token, expires_at) VALUES (?, ?, datetime('now', '+8 hours'))`,
-        [email, token]
+        `INSERT INTO auth_tokens (email, token, expires_at) VALUES (?, ?, ?)`,
+        [email, otp, expiresAt]
       );
       saveDatabase();
-
-      const magicLink = `http://localhost:${PORT}/verify?token=${token}`;
 
       const msg = {
         to: email,
         from: process.env.SENDER_EMAIL,
-        subject: 'Login to CS 173 Certificate of Service Portal',
-        text: `Click this link to securely log in: ${magicLink}`,
-        html: `<p>Click <strong><a href="${magicLink}">here</a></strong> to securely log in.</p>`,
+        subject: 'Your Login Code for CS 173 Portal',
+        text: `Your 6-digit login code is: ${otp}`,
+        html: `<h2>Your login code is: <span style="color: blue; letter-spacing: 5px;">${otp}</span></h2><p>This code will expire in 10 minutes.</p>`,
       };
 
       await sgMail.send(msg);
-      console.log(`Magic link sent to ${email}`);
-      res.json({ message: 'Verification email sent!' });
+      console.log(`OTP sent to ${email}`);
+      res.json({ message: 'Verification code sent!' });
+
     } catch (error) {
       console.error('Login error:', error);
       res.status(500).json({ error: 'Failed to process login' });
     }
   });
 
-  // Verify token from email link
-  app.get('/verify', (req, res) => {
-    const { token } = req.query;
+  // 2. Verify the typed OTP Code
+  app.post('/api/verify', express.json(), (req, res) => {
+    const { email, otp } = req.body;
 
-    if (!token) return res.status(400).send('Invalid link.');
+    if (!email || !otp) return res.status(400).json({ error: 'Missing credentials.' });
 
     try {
-      const results = db.exec(`SELECT * FROM auth_tokens WHERE token = '${token}'`);
+      const results = db.exec(`SELECT * FROM auth_tokens WHERE email = '${email}' AND token = '${otp}'`);
 
       if (results.length === 0 || results[0].values.length === 0) {
-        return res.status(400).send('Invalid or expired link.');
+        return res.status(400).json({ error: 'Invalid or expired code.' });
       }
 
       const row = results[0].values[0];
-      const email = row[0];
       const expiresAt = row[2];
 
-      if (new Date() > new Date(expiresAt)) {
-        return res.status(400).send('Link has expired. Please request a new one.');
+      if (Date.now() > parseInt(expiresAt)) {
+        return res.status(400).json({ error: 'Code has expired. Please request a new one.' });
       }
 
-      db.run(`DELETE FROM auth_tokens WHERE token = ?`, [token]);
+      // Valid OTP! Delete it so it can't be used twice
+      db.run(`DELETE FROM auth_tokens WHERE email = ?`, [email]);
       saveDatabase();
 
       res.cookie('user_email', email, {
         maxAge: 24 * 60 * 60 * 1000,
         httpOnly: false,
-        secure: false
+        secure: false // Keep false for local testing! Switch to true when pushing to the live site.
       });
 
-      res.redirect('/dashboard.html');
+      res.json({ message: 'Login successful!', redirect: '/dashboard.html' });
     } catch (error) {
       console.error('Verification error:', error);
-      res.status(500).send('Server error during verification.');
+      res.status(500).json({ error: 'Server error during verification.' });
     }
   });
 

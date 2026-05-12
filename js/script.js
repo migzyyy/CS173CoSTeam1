@@ -112,9 +112,13 @@ document.querySelectorAll('input[name="hours[]"]').forEach(input => {
   input.addEventListener('input', calculateTotal);
 });
 
-document.getElementById('declarationMonth').addEventListener('input', function() {
-  const preview = document.getElementById('declarationPreview');
-  preview.textContent = this.value || '_____';
+document.getElementById('declarationMonth').addEventListener('change', function(e) {
+    const month = e.target.value;
+    const certInput = document.getElementById('certificationText');
+    
+    if (month) {
+        certInput.value = `upon my honor that I have rendered full service for the month of ${month}.`;
+    }
 });
 
 document.getElementById('sigDate').valueAsDate = new Date();
@@ -169,6 +173,10 @@ document.getElementById('cosForm').addEventListener('submit', async function(e) 
     hoursPerWeek: hoursPerWeek,
     totalHours: totalHours,
     declarationMonth: document.getElementById('declarationMonth').value,
+
+    // YOU MUST ADD THIS LINE FOR THE PROFESSOR's REQUIREMENT:
+    certification_text: document.getElementById('certificationText').value,
+    
     signatureData: signatureData,
     submissionDate: document.getElementById('sigDate').value
   };
