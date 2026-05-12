@@ -8,9 +8,11 @@
 </head>
 <body>
   <script>
-    // Simple auth check - if no cookie, redirect to login
-    if (!document.cookie.includes('user_email')) {
-      window.location.href = '/';
+    // Simple auth check - skip on localhost
+    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      if (!document.cookie.includes('user_email')) {
+        window.location.href = '/';
+      }
     }
   </script>
   <div class="container">
