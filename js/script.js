@@ -112,7 +112,7 @@ document.querySelectorAll('input[name="hours[]"]').forEach(input => {
   input.addEventListener('input', calculateTotal);
 });
 
-document.getElementById('declarationMonth').addEventListener('change', function(e) {
+document.getElementById('month').addEventListener('change', function(e) {
     const month = e.target.value;
     const certInput = document.getElementById('certificationText');
     
@@ -145,7 +145,6 @@ function resetForm() {
   `;
   
   document.getElementById('totalHours').value = '';
-  document.getElementById('declarationPreview').textContent = '_____';
   document.getElementById('year').value = '2026';
   document.getElementById('sigDate').valueAsDate = new Date();
   updateRemoveButtons();
@@ -172,11 +171,7 @@ document.getElementById('cosForm').addEventListener('submit', async function(e) 
     activities: activities,
     hoursPerWeek: hoursPerWeek,
     totalHours: totalHours,
-    declarationMonth: document.getElementById('declarationMonth').value,
-
-    // YOU MUST ADD THIS LINE FOR THE PROFESSOR's REQUIREMENT:
-    certification_text: document.getElementById('certificationText') ? document.getElementById('certificationText').value : '',
-    
+    declarationMonth: document.getElementById('month').value,
     signatureData: signatureData,
     submissionDate: document.getElementById('sigDate').value
   };
