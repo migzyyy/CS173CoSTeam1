@@ -18,6 +18,7 @@ async function initDatabase() {
   db.run(`
     CREATE TABLE IF NOT EXISTS submissions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT,
       month TEXT NOT NULL,
       year INTEGER NOT NULL,
       name TEXT NOT NULL,
@@ -32,6 +33,13 @@ async function initDatabase() {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  // Add email column if missing (migration for existing DBs)
+  try {
+    db.run("ALTER TABLE submissions ADD COLUMN email TEXT");
+  } catch (e) {
+    // Column already exists
+  }
 
   saveDatabase();
   return db;

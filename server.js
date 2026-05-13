@@ -114,17 +114,21 @@ async function startServer() {
   app.post('/api/submit', (req, res) => {
 try {
       console.log('Received submission:', req.body);
+      const email = req.cookies.user_email;
+      if (!email) {
+        return res.status(401).json({ success: false, error: 'Not authenticated' });
+      }
       const {
         month, year, name, position, college, activities,
         hoursPerWeek, totalHours, declarationMonth, signatureData, submissionDate
       } = req.body;
 
       const sql = `
-        INSERT INTO submissions (month, year, name, position, college, activities, hours_per_week, total_hours, declaration_month, signature_data, submission_date, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+8 hours'))
+        INSERT INTO submissions (email, month, year, name, position, college, activities, hours_per_week, total_hours, declaration_month, signature_data, submission_date, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '+8 hours'))
       `;
       const params = [
-        month, year, name, position, college,
+        email, month, year, name, position, college,
         JSON.stringify(activities), JSON.stringify(hoursPerWeek),
         totalHours, declarationMonth, signatureData, submissionDate
       ];
@@ -145,9 +149,15 @@ try {
   // Get all submissions
   app.get('/api/submissions', (req, res) => {
     try {
+      const email = req.cookies.user_email;
+      if (!email) {
+        return res.status(401).json({ success: false, error: 'Not authenticated' });
+      }
+
       const results = db.exec(`
         SELECT id, month, year, name, position, college, activities, hours_per_week, total_hours, declaration_month, submission_date, created_at
         FROM submissions
+        WHERE email = '${email}'
         ORDER BY created_at DESC
       `);
 
