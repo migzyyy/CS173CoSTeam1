@@ -6,7 +6,6 @@
   <title>Login - Certificate of Service</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    
     body {
       font-family: 'Times New Roman', Times, serif;
       background: #f5f5f5;
@@ -16,7 +15,6 @@
       align-items: center;
       padding: 20px;
     }
-    
     .login-container {
       background: white;
       padding: 50px 60px;
@@ -25,24 +23,21 @@
       max-width: 400px;
       text-align: center;
     }
-    
     .login-container h1 {
       font-size: 24px;
       font-weight: bold;
+      text-transform: uppercase;
       margin-bottom: 30px;
     }
-    
     .form-group {
       text-align: left; 
       margin-bottom: 10px; 
     }
-    
     .form-group label {
       display: block; 
       margin-bottom: 8px; 
       font-size: 16px;
     }
-    
     .form-control {
       width: 100%;
       padding: 10px;
@@ -50,11 +45,10 @@
       font-family: inherit;
       font-size: 16px;
     }
-    
     .btn-primary {
       width: 100%;
       padding: 10px;
-      background-color: #007bff; /* Classic Blue */
+      background-color: #007bff;
       color: white; 
       border: none;
       font-size: 16px;
@@ -62,9 +56,7 @@
       font-family: inherit;
       margin-top: 25px; 
     }
-    
     .btn-primary:hover { background-color: #0056b3; }
-    
     .alert-success {
       background-color: #d4edda;
       color: #155724;
@@ -80,7 +72,7 @@
   <div class="login-container">
     <h1>LOGIN</h1>
     
-    <form id="loginForm">
+    <form id="loginForm" onsubmit="return false;">
       <div id="emailStep">
         <div class="form-group">
           <label for="email">Email Address</label>
@@ -105,14 +97,9 @@
     const otpStep = document.getElementById('otpStep');
     let userEmail = '';
 
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
+    document.getElementById('sendOtpBtn').addEventListener('click', async () => {
       const emailInput = document.getElementById('email');
-      if (!emailInput) {
-        alert("CRITICAL HTML ERROR: Could not find id=\"email\" on your input box!");
-        return;
-      }
+      if (!emailInput.value) return; // Let HTML validation handle empty fields
       
       userEmail = emailInput.value;
       document.getElementById('sendOtpBtn').innerText = 'Sending...';
@@ -128,18 +115,19 @@
           emailStep.style.display = 'none';
           otpStep.style.display = 'block';
         } else {
-          alert('Failed to send code. Please try again.');
+          alert('Failed to send code. Check backend terminal for errors.');
           document.getElementById('sendOtpBtn').innerText = 'Send Login Code';
         }
       } catch (error) {
-        console.error("Fetch error:", error);
-        alert('Network Error: Could not reach the server. Is node server.js running?');
+        alert('Network Error. Is your Node server running?');
         document.getElementById('sendOtpBtn').innerText = 'Send Login Code';
       }
     });
 
     document.getElementById('verifyOtpBtn').addEventListener('click', async () => {
       const otpCode = document.getElementById('otp').value;
+      if (!otpCode) return;
+
       document.getElementById('verifyOtpBtn').innerText = 'Verifying...';
       
       try {
@@ -157,8 +145,7 @@
           document.getElementById('verifyOtpBtn').innerText = 'Verify & Login';
         }
       } catch (error) {
-        console.error("Verify error:", error);
-        alert('Network Error: Could not reach the server.');
+        alert('Network Error. Could not reach server.');
         document.getElementById('verifyOtpBtn').innerText = 'Verify & Login';
       }
     });

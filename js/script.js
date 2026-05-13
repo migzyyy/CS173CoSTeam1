@@ -175,7 +175,7 @@ document.getElementById('cosForm').addEventListener('submit', async function(e) 
     declarationMonth: document.getElementById('declarationMonth').value,
 
     // YOU MUST ADD THIS LINE FOR THE PROFESSOR's REQUIREMENT:
-    certification_text: document.getElementById('certificationText').value,
+    certification_text: document.getElementById('certificationText') ? document.getElementById('certificationText').value : '',
     
     signatureData: signatureData,
     submissionDate: document.getElementById('sigDate').value
