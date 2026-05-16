@@ -3,14 +3,14 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const crypto = require('crypto');
-const sgMail = require('@sendgrid/mail');
+const { Resend } = require('resend');
 const cookieParser = require('cookie-parser');
 const { initDatabase, getDatabase, saveDatabase } = require('./database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
@@ -49,15 +49,18 @@ async function startServer() {
       );
       saveDatabase();
 
-      const msg = {
+      const { data, error } = await resend.emails.send({
+        from: `CS 173 Portal <${process.env.SENDER_EMAIL}>`,
         to: email,
-        from: process.env.SENDER_EMAIL,
         subject: 'Your Login Code for CS 173 Portal',
-        text: `Your 6-digit login code is: ${otp}`,
         html: `<h2>Your login code is: <span style="color: blue; letter-spacing: 5px;">${otp}</span></h2><p>This code will expire in 10 minutes.</p>`,
-      };
+      });
 
-      await sgMail.send(msg);
+      if (error) {
+        console.error('Resend error:', error);
+        return res.status(500).json({ error: 'Failed to send email via Resend' });
+      }
+
       console.log(`OTP sent to ${email}`);
       res.json({ message: 'Verification code sent!' });
 
